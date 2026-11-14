@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Steal Time - 공식 앱</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif; }
+    body { background-color: #000000; color: #f2f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 420px; min-height: 100vh; background: #0b0d12; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+    
+    .screen { display: none; flex-direction: column; flex: 1; padding: 24px; animation: fadeIn 0.35s ease; }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .top-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #64748b; margin-bottom: 16px; }
+    .store-tag { background: rgba(56, 189, 248, 0.1); color: #38bdf8; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+
+    .store-header { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+    .app-icon { width: 84px; height: 84px; border-radius: 22px; background: #000; border: 1.5px solid #22d3ee; display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 20px rgba(34, 211, 238, 0.25); }
+    .app-icon img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .app-meta h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; color: #ffffff; }
+    .app-meta p { font-size: 14px; color: #22d3ee; font-weight: 600; margin-bottom: 6px; }
+    .app-badge { font-size: 12px; color: #64748b; }
+
+    .store-stats { display: flex; justify-content: space-around; border-top: 1px solid #1e293b; border-bottom: 1px solid #1e293b; padding: 14px 0; margin: 24px 0; text-align: center; }
+    .stat-item span { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; }
+    .stat-item strong { font-size: 15px; color: #e2e8f0; }
+
+    .install-area { margin-bottom: 28px; }
+    .progress-wrapper { background: #151922; border-radius: 14px; height: 50px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #293548; }
+    .progress-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #0284c7, #22d3ee); transition: width 0.15s linear; }
+    .progress-text { position: relative; z-index: 2; font-size: 15px; font-weight: 700; color: #ffffff; }
+
+    .btn-open { width: 100%; height: 50px; background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: none; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); }
+    .btn-open:active { transform: scale(0.98); }
+
+    .app-desc h3 { font-size: 15px; margin-bottom: 10px; color: #e2e8f0; }
+    .app-desc p { font-size: 13.5px; line-height: 1.65; color: #94a3b8; background: #131722; padding: 16px; border-radius: 14px; border: 1px solid #1e293b; }
+
+    /* 스플래시 로딩 화면 */
+    #screen-splash { background: #000000; color: white; justify-content: center; align-items: center; text-align: center; }
+    .splash-logo { width: 100px; height: 100px; border-radius: 28px; border: 2px solid #22d3ee; overflow: hidden; margin-bottom: 20px; animation: pulse 1.2s infinite; box-shadow: 0 0 35px rgba(34, 211, 238, 0.4); }
+    .splash-logo img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
+    .spinner { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #22d3ee; border-radius: 50%; animation: spin 0.8s linear infinite; margin-top: 28px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 회원가입 화면 */
+    .signup-header { margin-top: 8px; margin-bottom: 24px; }
+    .signup-header .tag { display: inline-block; background: rgba(34, 211, 238, 0.1); color: #22d3ee; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; margin-bottom: 10px; }
+    .signup-header h2 { font-size: 24px; font-weight: 800; line-height: 1.35; margin-bottom: 8px; color: #ffffff; }
+    .signup-header p { font-size: 13.5px; color: #94a3b8; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
+    .form-group input { width: 100%; height: 48px; padding: 0 14px; background: #131722; border: 1.5px solid #222b3b; border-radius: 12px; font-size: 15px; color: #ffffff; }
+    .form-group input::placeholder { color: #475569; }
+    .form-group input:focus { outline: none; border-color: #22d3ee; }
+
+    .agree-box { display: flex; align-items: center; gap: 10px; background: #131722; padding: 12px 14px; border-radius: 12px; margin-top: 8px; margin-bottom: 20px; border: 1px solid #1e293b; cursor: pointer; }
+    .agree-box input[type="checkbox"] { width: 18px; height: 18px; accent-color: #22d3ee; cursor: pointer; }
+    .agree-box span { font-size: 13px; color: #cbd5e1; }
+
+    .btn-submit { width: 100%; height: 52px; background: linear-gradient(135deg, #0284c7, #22d3ee); color: #000; font-weight: 800; border: none; border-radius: 14px; font-size: 16px; cursor: pointer; margin-top: auto; box-shadow: 0 6px 20px rgba(34, 211, 238, 0.3); }
+    .btn-submit:disabled { background: #1e293b; color: #64748b; cursor: not-allowed; }
+
+    /* 글리치/경고 플래시 효과 */
+    #screen-done { justify-content: center; align-items: center; text-align: center; position: relative; }
+    .glitch-warning { position: absolute; top: 20px; left: 0; right: 0; background: rgba(239, 68, 68, 0.15); border-y: 1px solid #ef4444; color: #ef4444; font-weight: 800; font-size: 13.5px; padding: 10px; text-align: center; opacity: 0; transition: opacity 0.2s ease; z-index: 10; letter-spacing: -0.5px; }
+    
+    .check-circle { width: 76px; height: 76px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; color: #10b981; display: flex; justify-content: center
